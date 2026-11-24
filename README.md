@@ -9,7 +9,9 @@ On-device text-to-speech and streaming speech synthesis on a Qualcomm NPU, with 
 
 Based on [Fun-CosyVoice3-0.5B-2512](https://huggingface.co/FunAudioLLM/Fun-CosyVoice3-0.5B-2512).
 
-**Demo recording:** [Chinese speech synthesis](https://github.com/user-attachments/assets/30688b46-d131-4c6f-8dea-92bde290a87b).
+**Demo recording:**
+
+https://github.com/user-attachments/assets/30688b46-d131-4c6f-8dea-92bde290a87b
 
 ## 1. Install
 

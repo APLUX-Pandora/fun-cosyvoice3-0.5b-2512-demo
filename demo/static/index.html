@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fun-CosyVoice3 · Speech Synthesis</title>
+<link rel="icon" type="image/png" href="/logo.png">
+<style>
+  :root { --fg:#1f2328; --muted:#656d76; --bg:#f6f8fa; --card:#fff; --line:#d0d7de; --accent:#0969da;
+          --accent-2:#54aeff; --ok:#1a7f37; --bad:#cf222e; --sel:#f0f6ff; }
+  * { box-sizing: border-box; }
+  html, body { height:100%; }
+  body { margin:0; font:14px/1.45 system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+         color:var(--fg); background:var(--bg); display:flex; flex-direction:column; }
+  /* three layers: title bar (white), page tabs (centered band), the page */
+  header { display:flex; align-items:center; gap:18px; padding:10px 20px; background:var(--card);
+           border-bottom:1px solid var(--line); }
+  header h1 { font-size:17px; margin:0; }
+  header .logo { height:32px; width:auto; display:block; flex:none; }
+  header .logos { display:flex; align-items:center; gap:10px; }
+  nav { display:flex; justify-content:center; gap:20px; padding:12px 14px; background:#eef1f5;
+        border-bottom:1px solid var(--line); }
+  nav a { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-width:150px; padding:8px 20px;
+          border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--muted); font-size:15px;
+          cursor:pointer; white-space:nowrap; user-select:none;
+          transition:color .15s, border-color .15s, box-shadow .15s; }
+  nav a svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round;
+              stroke-linejoin:round; }
+  nav a:hover { color:var(--accent); border-color:var(--accent-2); }
+  nav a.on { color:var(--accent); border-color:var(--accent); font-weight:600;
+             box-shadow:0 2px 8px rgba(9,105,218,.15); }
+  .app { flex:1; min-height:0; display:grid; grid-template-columns:280px 1fr; grid-template-rows:1fr auto;
+         grid-template-areas:"voice main" "perf perf"; gap:10px; padding:10px 14px; }
+  #status { margin-left:auto; font-size:13px; color:var(--muted); white-space:nowrap; overflow:hidden;
+            text-overflow:ellipsis; max-width:55%; }
+  .ok { color:var(--ok) !important; } .bad { color:var(--bad) !important; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:10px 12px; min-height:0; }
+  .card h2 { font-size:14px; margin:0 0 8px; display:flex; align-items:center; gap:8px; }
+  .card h2 .right { margin-left:auto; }
+  button { font:inherit; padding:6px 16px; border-radius:6px; border:1px solid var(--accent); background:var(--accent);
+           color:#fff; cursor:pointer; }
+  button:disabled { opacity:.5; cursor:default; }
+  button.ghost { background:#fff; color:var(--accent); }
+  button.small { padding:1px 8px; font-size:12px; }
+  textarea, input[type=text], input[type=number], select { font:inherit; padding:6px 8px; border:1px solid var(--line);
+           border-radius:6px; background:#fff; }
+  label { color:var(--muted); font-size:13px; }
+  .muted { color:var(--muted); font-size:12px; }
+  /* voices */
+  #voice-card { grid-area:voice; display:flex; flex-direction:column; }
+  #voices { flex:1; overflow:auto; min-height:0; display:flex; flex-direction:column; gap:6px; padding:2px; }
+  .vr { display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--line); border-radius:8px;
+        background:var(--card); cursor:pointer; transition:border-color .15s, box-shadow .15s; }
+  .vr:hover { border-color:var(--accent-2); }
+  .vr .radio { flex:none; width:18px; height:18px; border:2px solid var(--line); border-radius:50%; position:relative; }
+  .vr.sel { border-color:var(--accent); background:var(--sel); box-shadow:0 0 0 1px var(--accent); }
+  .vr.sel .radio { border-color:var(--accent); background:var(--accent); }
+  .vr.sel .radio::after { content:""; position:absolute; left:4.5px; top:1.5px; width:4px; height:8px;
+                          border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
+  .vr .vt { flex:1; min-width:0; display:flex; flex-direction:column; }
+  .vr .name { font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .vr.sel .name { color:var(--accent); }
+  .vr .tag { font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .vr button { flex:none; padding:2px 7px; }
+  /* the three steps: voice, text, speak */
+  .step { flex:none; display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
+          border-radius:50%; background:var(--accent); color:#fff; font-size:13px; font-weight:600; }
+  .card h2.steph { font-size:15px; }
+  #run { font-weight:600; }
+  .mine { font-size:11px; color:var(--accent); border:1px solid var(--accent); border-radius:8px; padding:0 5px; }
+  .vg { font-size:12px; font-weight:600; color:var(--muted); padding:4px 2px 0; }
+  .vempty { font-size:12px; color:var(--muted); padding:4px 2px; }
+  /* main column */
+  #main { grid-area:main; display:flex; flex-direction:column; min-height:0; }
+  #styles { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:10px; }
+  #styles .sep { width:1px; height:16px; background:var(--line); margin:0 4px; }
+  .chip { padding:3px 12px; border:1px solid var(--line); border-radius:14px; background:#fff; color:var(--fg);
+          font-size:13px; cursor:pointer; }
+  .chip:hover { border-color:var(--accent); color:var(--accent); }
+  .chip.on { border-color:var(--accent); background:var(--accent); color:#fff; }
+  #intro { font-size:13px; color:var(--muted); margin-bottom:8px; }
+  #langs { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:10px; }
+  .hide { display:none !important; }
+  #text { flex:1; min-height:80px; resize:none; width:100%; }
+  #tagbar { display:flex; gap:6px; align-items:center; margin-top:6px; }
+  #viz { display:block; width:100%; height:80px; margin-top:8px; background:var(--bg); border:1px solid var(--line);
+         border-radius:6px; }
+  .ctl { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:8px; position:relative; }
+  .grow { flex:1; }
+  #settings { display:none; position:absolute; left:0; bottom:42px; z-index:5; background:var(--card);
+              border:1px solid var(--line); border-radius:8px; padding:12px 14px; box-shadow:0 6px 20px rgba(0,0,0,.15);
+              width:min(460px, 90vw); }
+  #settings.open { display:grid; gap:10px; }
+  #settings .row { display:flex; gap:10px; align-items:center; }
+  #settings .row > label:first-child { width:72px; flex:none; }
+  #settings input[type=text] { flex:1; }
+  #settings input[type=number] { width:90px; }
+  /* performance */
+  #perf { grid-area:perf; display:flex; align-items:center; gap:0; padding:8px 12px; }
+  .stat { flex:1; padding:0 10px; border-left:1px solid var(--line); min-width:0; }
+  .stat:first-child { border-left:none; padding-left:0; }
+  .stat b { display:block; font-size:16px; white-space:nowrap; }
+  .stat span { color:var(--muted); font-size:11px; white-space:nowrap; }
+  .stat.more { display:none; }
+  #perf.open .stat.more { display:block; }
+  /* clone dialog (the form itself: clone.js) */
+  #clone { position:fixed; inset:0; background:rgba(31,35,40,.35); display:none; align-items:center;
+           justify-content:center; z-index:10; }
+  #clone .dlg { background:var(--card); border-radius:10px; padding:16px 18px; width:min(520px, 94vw);
+                box-shadow:0 8px 30px rgba(0,0,0,.2); max-height:calc(100vh - 32px); overflow-y:auto; }
+  #clone h3 { margin:0 0 6px; font-size:15px; }
+  /* narrow screens: one column, the page scrolls */
+  @media (max-width: 900px) {
+    body { height:auto; } .app { grid-template-columns:1fr; grid-template-areas:"voice" "main" "perf"; }
+    nav { justify-content:flex-start; overflow-x:auto; gap:8px; }
+    nav a { min-width:0; padding:6px 12px; font-size:14px; }
+    #voices { max-height:260px; } #text { min-height:200px; } #viz { height:100px; }
+    #perf { flex-wrap:wrap; row-gap:8px; } .stat { flex:1 1 40%; }
+    #status { max-width:100%; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <span class="logos"><img class="logo" src="/logo.png" alt="APLUX"><img class="logo" src="/pandora.svg" alt="Pandora"></span>
+  <h1 data-i18n="title">Fun-CosyVoice3 · Speech Synthesis</h1>
+  <span id="status">Ready</span>
+  <button id="lang" class="ghost small" title="English / 中文">中文</button>
+</header>
+<nav id="nav">
+  <a data-tab="1" class="on"><svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/>
+    <path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg><span data-i18n="tab1">Voices & Synthesis</span></a>
+  <a data-tab="2"><svg viewBox="0 0 24 24"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/>
+    <circle cx="7.5" cy="7.5" r="1.5"/></svg><span data-i18n="tab2">Vocal Tags</span></a>
+  <a data-tab="3"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+    <path d="M9 9.5h.01M15 9.5h.01"/></svg><span data-i18n="tab3">Emotion</span></a>
+  <a data-tab="4"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>
+    <path d="M8.5 10.5h7M8.5 13.5h4"/></svg><span data-i18n="tab4">Dialect</span></a>
+</nav>
+<div class="app">
+
+  <section class="card" id="voice-card">
+    <h2 class="steph"><span class="step">1</span><span data-i18n="voices">Choose a voice</span>
+      <button id="add" class="ghost small right" data-i18n="clone_btn">＋ Clone</button></h2>
+    <div id="voices"></div>
+    <div id="saved-voices" aria-live="polite"></div>
+  </section>
+
+  <section class="card" id="main">
+    <h2 class="steph"><span class="step">2</span><span data-i18n="step_text">Type your text</span></h2>
+    <div id="intro"></div>
+    <div id="langs"></div>
+    <div id="styles"></div>
+    <textarea id="text" maxlength="10000" data-i18n-ph="text_ph">
+清晨五点半，天刚蒙蒙亮，老街上的第一家早点铺就开门了。蒸笼里冒出的白气顺着青石板路慢慢飘散，混着豆浆和油条的香味，把整条街都叫醒了。</textarea>
+    <div id="tagbar">
+      <span id="tagbtns" class="row">
+        <button class="ghost small" data-tag="[laughter]" data-i18n="tag_laugh"
+                data-i18n-title="tag_laugh_tip">+Laughter</button>
+        <button class="ghost small" data-tag="[breath]" data-i18n="tag_breath"
+                data-i18n-title="tag_breath_tip">+Breath</button>
+        <button class="ghost small" data-wrap="strong" data-i18n="tag_strong"
+                data-i18n-title="tag_strong_tip">+Emphasis</button>
+      </span>
+      <span class="grow"></span><span class="muted" id="count"></span>
+    </div>
+    <canvas id="viz"></canvas>
+    <div class="ctl">
+      <button id="gear" class="ghost" data-i18n="settings">⚙ Settings</button>
+      <div id="settings">
+        <div class="row"><label data-i18n="custom_ins">Instruction</label>
+          <input type="text" id="instruct" maxlength="200" data-i18n-ph="custom_ins_ph"></div>
+        <div class="row"><label>Seed</label><input id="seed" type="number" value="0" min="0"></div>
+        <div class="row"><label data-i18n="preroll">Preroll</label>
+          <input id="preroll" type="range" min="0" max="3" step="0.1" value="1.5">
+          <span id="preroll-v">1.5 s</span>
+          <span class="muted" data-i18n="preroll_hint">1.5 s by default: smooth playback</span></div>
+        <div class="row"><label data-i18n="hop">Hop size</label><select id="hop_max">
+          <option value="200" selected data-i18n="hop_200">200 (recommended)</option>
+          <option value="100" data-i18n="hop_100">100 (original default)</option></select></div>
+      </div>
+      <span class="grow"></span>
+      <button id="dl" class="ghost" disabled data-i18n="download">Download</button>
+      <button id="stop" class="ghost" disabled data-i18n="stop">Stop</button>
+      <span class="step">3</span><button id="run">▶ Synthesize</button>
+    </div>
+  </section>
+
+  <section class="card" id="perf">
+    <div class="stat"><b id="s-first">–</b><span data-i18n="st_first">First sound</span></div>
+    <div class="stat"><b id="s-rtf">–</b><span data-i18n="st_rtf">Real-time factor</span></div>
+    <div class="stat"><b id="s-audio">–</b><span data-i18n="st_audio">Audio length</span></div>
+    <div class="stat"><b id="s-stall">–</b><span data-i18n="st_stall">Stalls</span></div>
+    <div class="stat more"><b id="s-chunk">–</b><span data-i18n="st_chunk">First chunk</span></div>
+    <div class="stat more"><b id="s-total">–</b><span data-i18n="st_total">Generation time</span></div>
+    <div class="stat more"><b id="s-seg">–</b><span data-i18n="st_seg">Segments</span></div>
+    <div class="stat more"><b id="s-ahead">–</b><span data-i18n="st_ahead">Ahead of playback</span></div>
+    <button id="perf-more" class="ghost small">Details</button>
+  </section>
+</div>
+
+<div id="clone"><div class="dlg" id="clone-form"></div></div>
+<script src="/clone.js"></script>
+<script>
+const SR = 24000;
+let ctx = null, analyser = null, sources = [], rid = null, ctrl = null;
+let voices = [], voice = null, preview = null, previewId = null;
+// four pages, each adding one capability: 1 voices (built-in, cloned) in any language, 2 + vocal tags, 3 + emotion
+// (or speed), 4 + dialect (pages 3 and 4 are alternatives: the model follows one instruction at a time)
+// instructions in the model's own wording (its list of supported instructions), without the template around each;
+// the first item is the label key (I18N preset)
+const PRESETS = {
+  3: [["happy", "请非常开心地说一句话。"], ["sad", "请非常伤心地说一句话。"], ["angry", "请非常生气地说一句话。"], null,
+      ["fast", "请用尽可能快地语速说一句话。"], ["slow", "请用尽可能慢地语速说一句话。"]],
+  4: [["sichuan", "请用四川话表达。"], ["yue", "请用广东话表达。"]]
+};
+const DEFAULT_TEXT = "你好，欢迎使用语音合成。今天，我们用清晰自然的声音，把文字变成可以听见的表达。";
+// one short line per language of the model (Japanese goes through the katakana reading of the business layer);
+// the languages are named in English
+const LANG_SAMPLES = [
+  ["Chinese", DEFAULT_TEXT],
+  ["English", "Hello, welcome to text-to-speech. Today, we use a clear and natural voice to turn written words into speech you can hear."],
+  ["Japanese", "おはようございます。今日はとてもいい天気ですね。一緒に公園へ散歩に行きませんか。"],
+  ["Korean", "안녕하세요. 오늘은 날씨가 정말 좋네요. 같이 공원에 산책하러 갈까요?"],
+  ["German", "Guten Morgen! Heute ist das Wetter wunderschön. Wollen wir zusammen im Park spazieren gehen?"],
+  ["French", "Bonjour ! Il fait très beau aujourd'hui. Et si on allait se promener ensemble dans le parc ?"],
+  ["Spanish", "¡Buenos días! Hoy hace un tiempo estupendo. ¿Vamos a dar un paseo juntos por el parque?"],
+  ["Italian", "Buongiorno! Oggi il tempo è bellissimo. Andiamo a fare una passeggiata insieme nel parco?"],
+  ["Russian", "Доброе утро! Сегодня прекрасная погода. Давай вместе погуляем в парке?"],
+];
+// built-in texts in the page's language: the vocal-tag page's text ("tags"), the emotion page's first text ("default")
+// and the sample line of a preset (keyed by its instruction): wording that carries the emotion / dialect (the model
+// takes an emotion mostly from the sentiment of the text), with vocal tags; the instructions stay in the model's Chinese
+// wording. The dialect lines are Chinese only (the Cantonese line is the model's own example).
+const SAMPLE_TEXT = {
+  zh: {
+    default: DEFAULT_TEXT,
+    tags: "我跟你说个事儿，[laughter]昨天我在路上碰到了老同学，[breath]我们站在路边聊了一下午。",
+    "请非常开心地说一句话。": "哇！我中奖了！整整五百万！[laughter]太棒了！我要带全家人去旅游，开心得简直要飞起来啦！",
+    "请非常伤心地说一句话。": "他就这样走了，[breath]连一句再见都没来得及说。我一个人站在空荡荡的站台上，[breath]心里真的好难过。",
+    "请非常生气地说一句话。": "你怎么<strong>又</strong>迟到了！说好八点见面，我在这儿整整等了你<strong>一个小时</strong>！电话也不接，你到底想怎么样！",
+    "请用四川话表达。": "今天天气巴适得很，走嘛，我们一起去吃火锅，吃完再去逛一逛宽窄巷子！",
+    "请用广东话表达。": "好少咯，一般系放嗰啲国庆啊，中秋嗰啲可能会咯。"
+  },
+  en: {
+    default: LANG_SAMPLES[1][1],
+    tags: "Let me tell you something. [laughter] Yesterday I ran into an old classmate on the street, [breath] and we "
+          + "stood there chatting the whole afternoon.",
+    "请非常开心地说一句话。": "Wow! I won the lottery! Five million dollars! [laughter] This is amazing! I'm taking the whole "
+                            + "family on a trip, I'm so happy I could fly!",
+    "请非常伤心地说一句话。": "He just left like that, [breath] without even saying goodbye. I stood alone on the empty "
+                            + "platform, [breath] and my heart really ached.",
+    "请非常生气地说一句话。": "You're late <strong>again</strong>! We said eight o'clock, and I've been waiting here for a "
+                            + "<strong>whole hour</strong>! You didn't even answer your phone. What is wrong with you!"
+  }
+};
+const sample = k => SAMPLE_TEXT[LANG][k] || SAMPLE_TEXT.zh[k];
+// a built-in text that the user has not edited follows the page language (vocal-tag and emotion pages)
+function localizeTexts(from) {
+  for (const p of [2, 3]) {
+    const cur = p === tab ? $("text").value : tabText[p];
+    const k = Object.keys(SAMPLE_TEXT[from]).find(key => SAMPLE_TEXT[from][key] === cur);
+    if (k === undefined || !SAMPLE_TEXT[LANG][k]) continue;
+    if (p === tab) { $("text").value = sample(k); updateCount(); } else tabText[p] = sample(k);
+  }
+}
+// per page: its text and (pages 3, 4) its preset
+let tab = 1;
+const tabText = { 1: DEFAULT_TEXT, 2: SAMPLE_TEXT.zh.tags, 3: DEFAULT_TEXT, 4: DEFAULT_TEXT };
+const tabIns = { 3: "", 4: "" };
+// the instruction sent: the settings' custom one, else the page's preset, else the voice's own (a role voice)
+function instruction() {
+  const v = voices.find(x => x.id === voice);
+  return $("instruct").value.trim() || tabIns[tab] || (v && v.instruct) || "";
+}
+const $ = id => document.getElementById(id);
+
+// ------------------------------------------------------------------------------------------------ page language
+// the page in English (default) or Chinese (the button in the header; the choice is remembered per browser)
+const I18N = {
+  zh: {
+    title: "Fun-CosyVoice3 · 语音合成", ready: "就绪", tab1: "克隆与合成", tab2: "语气标签", tab3: "情绪", tab4: "方言",
+    voices: "选择音色", step_text: "输入文字", clone_btn: "＋ 克隆", clone_tip: "用一段录音克隆新音色",
+    clone_full: n => `最多 ${n} 个克隆音色，请先删除不用的`,
+    text_ph: "输入要合成的文字（支持中、英、日、韩等 9 种语言）",
+    tag_laugh: "+笑声", tag_laugh_tip: "在光标处插入一声笑", tag_breath: "+吸气", tag_breath_tip: "在光标处插入吸气声",
+    tag_strong: "+重读", tag_strong_tip: "先选中文字再点，重读这几个字",
+    settings: "⚙ 设置", custom_ins: "自定义指令", custom_ins_ph: "填写后覆盖页面上的选择", preroll: "预缓冲",
+    preroll_hint: "默认 1.5 秒，保证播放不卡顿", hop: "分段上限", hop_200: "200（推荐）", hop_100: "100（上游默认）",
+    download: "下载", stop: "停止", run_as: n => `▶ 用「${n}」合成`,
+    listen: "试听参考录音",
+    st_first: "首次出声", st_rtf: "实时率", st_audio: "音频时长", st_stall: "播放卡顿", st_chunk: "首包到达",
+    st_total: "生成总耗时", st_seg: "分段", st_ahead: "领先播放", more: "详情", less: "收起",
+    female: "女", male: "男", c_done: (n, s) => `已克隆音色「${n}」并选中（${s} s）`,
+    intro: { 1: "选一个音色，输入文字就能合成，支持 9 种语言；也可以用“＋ 克隆”克隆自己的声音。",
+             2: "在文字里插入语气标签：笑声、吸气，或选中文字后重读。",
+             3: "选一种情绪或语速，会自动填入一句适合的示例，可以修改。",
+             4: "选一种方言，会自动填入一句适合的示例，可以修改。" },
+    samples: "示例", builtin: "内置", mine: "我的克隆", none_yet: "暂无，可用“＋ 克隆”添加", own_style: "自带风格",
+    del_tip: "删除这个音色",
+    preset: { happy: "开心", sad: "伤心", angry: "生气", fast: "快", slow: "慢", sichuan: "四川话", yue: "粤语" },
+    none: "无", none_own: n => `无（${n}自带风格）`, no_ins: "不加指令", custom: "自定义",
+    need_text: "请输入文字", no_voice: "没有可用的音色", generating: "生成中…", seg_flag: (i, f) => `第 ${i} 段异常：${f}`,
+    stopped: "已停止", done: "完成", done_stalls: n => `完成，播放卡顿 ${n} 次（可在设置里调大预缓冲）`, error: "出错：",
+    stalls: (n, g) => `${n} 次 / ${g} s`, min: (m, s) => `${m} 分 ${s} 秒`,
+    del_confirm: n => `删除音色「${n}」？删除后不能恢复。`, del_busy: "这个音色正在合成中，结束后再删除",
+    del_locked: "锁定的音色不能删除", del_failed: "删除失败", deleted: n => `已删除音色「${n}」`
+  },
+  en: {
+    title: "Fun-CosyVoice3 · Speech Synthesis", ready: "Ready", tab1: "Voices & Synthesis", tab2: "Vocal Tags",
+    tab3: "Emotion", tab4: "Dialect",
+    voices: "Choose a voice", step_text: "Type your text", clone_btn: "＋ Clone",
+    clone_tip: "Clone a new voice from a recording",
+    clone_full: n => `At most ${n} cloned voices: delete one first`,
+    text_ph: "Type the text to speak (any of 9 languages: Chinese, English, Japanese, Korean, ...)",
+    tag_laugh: "+Laughter", tag_laugh_tip: "Insert a laugh at the cursor", tag_breath: "+Breath",
+    tag_breath_tip: "Insert a breath at the cursor", tag_strong: "+Emphasis",
+    tag_strong_tip: "Select words first, then click to stress them",
+    settings: "⚙ Settings", custom_ins: "Instruction", custom_ins_ph: "overrides the choice on the page",
+    preroll: "Preroll", preroll_hint: "1.5 s by default: smooth playback", hop: "Hop size",
+    hop_200: "200 (recommended)",
+    hop_100: "100 (original default)", download: "Download", stop: "Stop",
+    run_as: n => `▶ Speak as ${n}`, listen: "Listen to the reference recording",
+    st_first: "First sound", st_rtf: "Real-time factor", st_audio: "Audio length", st_stall: "Stalls",
+    st_chunk: "First chunk", st_total: "Generation time", st_seg: "Segments", st_ahead: "Ahead of playback",
+    more: "Details", less: "Less",
+    female: "Female", male: "Male", c_done: (n, s) => `Cloned voice “${n}” and selected it (${s} s)`,
+    intro: { 1: "Pick a voice and type text in any of 9 languages, or clone your own voice with “＋ Clone”.",
+             2: "Insert vocal tags into the text: a laugh, a breath, or stress on selected words.",
+             3: "Pick an emotion or a speed; a matching sample sentence is filled in, and you can edit it.",
+             4: "Pick a dialect; a matching sample sentence is filled in, and you can edit it." },
+    samples: "Samples", builtin: "Built-in", mine: "My clones", none_yet: "None yet: add one with “＋ Clone”",
+    own_style: "own style", del_tip: "Delete this voice",
+    preset: { happy: "Happy", sad: "Sad", angry: "Angry", fast: "Fast", slow: "Slow", sichuan: "Sichuanese",
+              yue: "Cantonese" },
+    none: "None", none_own: n => `None (${n}'s own style)`, no_ins: "No instruction", custom: "Custom",
+    need_text: "Please type some text", no_voice: "No voice available", generating: "Generating…",
+    seg_flag: (i, f) => `Segment ${i}: ${f}`, stopped: "Stopped", done: "Done",
+    done_stalls: n => `Done; playback stalled ${n} times (raise the preroll in the settings)`, error: "Error: ",
+    stalls: (n, g) => `${n}× / ${g} s`, min: (m, s) => `${m} min ${s} s`,
+    del_confirm: n => `Delete voice “${n}”? This cannot be undone.`,
+    del_busy: "The voice is speaking; delete it afterwards",
+    del_locked: "Locked voices cannot be deleted", del_failed: "Delete failed", deleted: n => `Deleted voice “${n}”`
+  }
+};
+// the built-in voices' names in English (the model package names them in Chinese)
+const VOICE_EN = { "female-zh": "Female (Chinese)", "male-zh": "Male (Chinese)", "female-en": "Female (English)",
+                   "male-en": "Male (English)" };
+let LANG = "en";
+const t = k => I18N[LANG][k];
+const vname = v => (LANG === "en" && VOICE_EN[v.id]) || v.name;
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.title = t("title");
+  const each = (attr, f) => document.querySelectorAll(`[${attr}]`).forEach(e => f(e, t(e.getAttribute(attr))));
+  each("data-i18n", (e, v) => e.textContent = v);
+  each("data-i18n-ph", (e, v) => e.placeholder = v);
+  each("data-i18n-title", (e, v) => e.title = v);
+  $("lang").textContent = LANG === "zh" ? "English" : "中文";
+  $("perf-more").textContent = $("perf").classList.contains("open") ? t("less") : t("more");
+  if (!ctrl) status(t("ready"));
+  $("intro").textContent = t("intro")[tab];
+  $("langs").innerHTML = `<span class="muted">${t("samples")}</span>`
+    + LANG_SAMPLES.map(([l], i) => `<button class="chip" data-i="${i}">${l}</button>`).join("");
+  renderVoices(); renderPresets();
+  CloneDialog.applyLang(LANG);
+}
+
+function setStat(id, v) { $(id).textContent = v; }
+function fmt(s) {
+  if (s < 60) return s.toFixed(2) + " s";
+  const r = Math.round(s);
+  return t("min")(Math.floor(r / 60), r % 60);
+}
+function stopPlayback() { sources.forEach(s => { try { s.stop(); } catch (e) {} }); sources = []; }
+function updateCount() { $("count").textContent = `${$("text").value.length} / 10000`; }
+function status(msg, cls) { const s = $("status"); s.textContent = msg; s.className = cls || ""; s.title = msg; }
+const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
+function esc(t) { return String(t).replace(/[&<>"]/g, c => ESC[c]); }
+
+const MAX_USER_VOICES = 20;
+let savedVoices = [];
+// voices are grouped: built-in (the demo's voices, e.g. a role voice with its own style) and cloned
+const isMine = v => v.user && !v.locked;
+function voiceRow(v) {
+  const tag = [isMine(v) ? (v.gender === "male" ? t("male") : t("female")) : "", v.instruct ? t("own_style") : ""]
+    .filter(Boolean).join(" · ");
+  return `
+    <div class="vr${v.id === voice ? " sel" : ""}" data-id="${esc(v.id)}" title="${esc(v.prompt_text)}">
+      <span class="radio"></span>
+      <span class="vt"><span class="name">${esc(vname(v))}</span>${tag ? `<span class="tag">${tag}</span>` : ""}</span>
+      <button class="ghost small" data-play="${esc(v.id)}" title="${t("listen")}">
+        ${v.id === previewId ? "■" : "▶"}</button>
+      ${isMine(v) ? `<button class="ghost small" data-del="${esc(v.id)}" title="${t("del_tip")}">🗑</button>` : ""}
+    </div>`;
+}
+function renderVoices() {
+  const nUser = savedVoices.filter(v => v.stored).length, full = nUser >= MAX_USER_VOICES;
+  $("voices").innerHTML = [[t("builtin"), voices.filter(v => !v.user)], [t("mine"), voices.filter(v => v.user)]]
+    .map(([label, vs]) => `<div class="vg">${label}</div>` +
+      (vs.length ? vs.map(voiceRow).join("") : `<div class="vempty">${t("none_yet")}</div>`)).join("");
+  $("add").disabled = full;
+  $("add").title = full ? t("clone_full")(MAX_USER_VOICES) : t("clone_tip");
+  const cur = voices.find(v => v.id === voice);                // step 3 names the selected voice
+  $("run").textContent = t("run_as")(cur ? vname(cur) : "–");
+}
+
+function selectVoice(id) { voice = id; renderVoices(); renderPresets(); }
+
+function togglePreview(id) {
+  if (preview) { preview.pause(); preview = null; }
+  if (previewId === id) { previewId = null; renderVoices(); return; }
+  previewId = id;
+  preview = new Audio("/voice_wav/" + id);
+  preview.onended = () => { previewId = null; preview = null; renderVoices(); };
+  preview.play();
+  renderVoices();
+}
+
+async function loadVoices(select) {
+  voices = await (await fetch("/voices")).json();
+  if (select) voice = select;
+  if (!voices.some(v => v.id === voice)) voice = voices.length ? voices[0].id : null;
+  renderVoices(); renderPresets();
+  const savedPanel = $("saved-voices");
+  savedPanel.replaceChildren();
+  try {
+    savedVoices = await (await fetch("/voices/saved")).json();
+    renderVoices();
+    for (const item of savedVoices.filter(v => v.state !== "ready")) {
+      const row = document.createElement("div");
+      const label = document.createElement("span");
+      label.textContent = `${item.name || item.id}: ${item.state}`;
+      row.append(label);
+      const retry = document.createElement("button");
+      retry.textContent = "Retry loading saved voice";
+      retry.onclick = async () => {
+        retry.disabled = true; label.textContent = `${item.name || item.id}: saved/waiting-to-load`;
+        try {
+          const response = await fetch(`/voices/${encodeURIComponent(item.id)}/load`, {method:"POST"});
+          const result = await response.json();
+          if (!response.ok || result.state !== "ready") throw new Error(result.message || "Load failed");
+          await loadVoices(result.voice.id);
+        } catch (error) { label.textContent = `${item.name || item.id}: saved/load-failed — ${error.message}`; retry.disabled = false; }
+      };
+      if (item.stored) {
+        row.append(retry);
+        if (!item.locked) {
+          const remove = document.createElement("button");
+          remove.textContent = t("del_tip");
+          remove.onclick = () => deleteVoice(item.id, item.name);
+          row.append(remove);
+        }
+      }
+      savedPanel.append(row);
+    }
+  } catch (error) { savedPanel.textContent = `Saved voice status unavailable: ${error.message}`; }
+
+}
+
+// ------------------------------------------------------------------------------------------------ voice cloning
+// the form is clone.js (shared with the examples' cloning page); a new voice is selected at once
+function openClone(show) {
+  $("clone").style.display = show ? "flex" : "none";
+  if (show) CloneDialog.open(); else CloneDialog.close();
+}
+CloneDialog.mount($("clone-form"), {
+  lang: LANG, fields: { category: "mandarin" }, onCancel: () => openClone(false),
+  onCloned: async j => {
+    await loadVoices(j.voice.id);
+    openClone(false);
+    status(t("c_done")(j.voice.name, j.clone_s), "ok");
+  }
+});
+
+async function deleteVoice(id, name = null) {
+  const v = voices.find(x => x.id === id);
+  const label = name ?? (v && vname(v));
+  if (!label || !confirm(t("del_confirm")(label))) return;
+  const r = await fetch("/voices/" + encodeURIComponent(id), { method: "DELETE" });
+  if (!r.ok) {
+    const j = await r.json().catch(() => ({}));
+    status(j.error === "busy" ? t("del_busy") : j.error === "locked" ? t("del_locked") : t("del_failed"), "bad");
+    return;
+  }
+  if (previewId === id && preview) { preview.pause(); preview = null; previewId = null; }
+  await loadVoices();
+  status(t("deleted")(label));
+}
+
+// pages 3 / 4: one row of presets, one at a time; "none" = the voice's own style (a role voice) or none; an
+// instruction typed in the settings overrides the page and shows as "custom"
+function renderPresets() {
+  if (!PRESETS[tab]) { $("styles").innerHTML = ""; return; }
+  const custom = $("instruct").value.trim(), cur = custom ? null : tabIns[tab], v = voices.find(x => x.id === voice);
+  const chip = (label, ins, title) => `<button class="chip${ins === cur ? " on" : ""}" title="${esc(title || ins)}" `
+    + `data-ins="${esc(ins)}">${label}</button>`;
+  const own = v && v.instruct;
+  $("styles").innerHTML = chip(own ? t("none_own")(esc(vname(v))) : t("none"), "", own ? v.instruct : t("no_ins")) +
+    `<span class="sep"></span>` +
+    PRESETS[tab].map(x => x ? chip(t("preset")[x[0]], x[1]) : `<span class="sep"></span>`).join("") +
+    (custom ? `<span class="sep"></span><button class="chip on" title="${esc(custom)}">${t("custom")}</button>` : "");
+}
+function setTab(t) {
+  tabText[tab] = $("text").value;
+  tab = t;
+  document.querySelectorAll("#nav a").forEach(a => a.classList.toggle("on", +a.dataset.tab === t));
+  $("intro").textContent = I18N[LANG].intro[t];
+  $("langs").classList.toggle("hide", t !== 1);
+  $("styles").classList.toggle("hide", !PRESETS[t]);
+  $("tagbtns").classList.toggle("hide", t === 1);
+  $("text").value = tabText[t]; updateCount();
+  renderPresets();
+}
+
+async function run() {
+  if (ctrl) return;                                              // one request at a time (Ctrl+Enter while running)
+  const text = $("text").value.trim();
+  if (!text) { status(t("need_text"), "bad"); return; }
+  if (!voice) { status(t("no_voice"), "bad"); return; }
+  ctrl = new AbortController();
+  try {
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: SR });
+    await ctx.resume();
+  } catch (e) { ctrl = null; status(t("error") + e.message, "bad"); return; }
+  if (!analyser) {                        // every chunk plays through one analyser, which feeds the visualization
+    analyser = ctx.createAnalyser(); analyser.fftSize = 2048; analyser.smoothingTimeConstant = 0.75;
+    analyser.connect(ctx.destination);
+  }
+  stopPlayback();
+  const preroll = +$("preroll").value;
+  rid = null; $("run").disabled = true; $("stop").disabled = false; $("dl").disabled = true;
+  ["s-first", "s-chunk", "s-audio", "s-total", "s-rtf", "s-stall", "s-seg", "s-ahead"].forEach(i => setStat(i, "…"));
+  status(t("generating"));
+  const t0 = performance.now();
+  let next = 0, chunks = 0, stalls = 0, gap = 0, audio = 0, nseg = 0, stopped = false, flagged = false;
+
+  function play(i16) {
+    const f = new Float32Array(i16.length);
+    for (let i = 0; i < i16.length; i++) f[i] = i16[i] / 32768;
+    const b = ctx.createBuffer(1, f.length, SR); b.copyToChannel(f, 0);
+    const src = ctx.createBufferSource(); src.buffer = b; src.connect(analyser);
+    src.onended = () => { const k = sources.indexOf(src); if (k >= 0) sources.splice(k, 1); };
+    const now = ctx.currentTime;
+    let at;
+    if (chunks === 0) {                      // the first chunk starts `preroll` s after it arrives
+      at = now + Math.max(preroll, 0.02);
+      const arr = (performance.now() - t0) / 1000;
+      setStat("s-chunk", arr.toFixed(2) + " s"); setStat("s-first", (arr + preroll).toFixed(2) + " s");
+    }
+    else if (now > next) { stalls++; gap += now - next; at = now + 0.01; }   // arrived after the previous one ended
+    else at = next;
+    src.start(at); sources.push(src);
+    next = at + b.duration; chunks++; audio += b.duration;
+    setStat("s-audio", fmt(audio));
+    setStat("s-ahead", Math.max(0, next - ctx.currentTime).toFixed(1) + " s");
+    setStat("s-stall", stalls ? t("stalls")(stalls, gap.toFixed(2)) : "0");
+  }
+
+  try {
+    const r = await fetch("/tts", { method: "POST", headers: { "Content-Type": "application/json" },
+      signal: ctrl.signal,
+      body: JSON.stringify({ text, voice, instruct: instruction(), seed: +$("seed").value || 0,
+                             hop_max: $("hop_max").value }) });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const reader = r.body.getReader();
+    let buf = new Uint8Array(0);
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const nb = new Uint8Array(buf.length + value.length); nb.set(buf); nb.set(value, buf.length); buf = nb;
+      while (buf.length >= 5) {
+        const type = buf[0], len = new DataView(buf.buffer, buf.byteOffset + 1, 4).getUint32(0, true);
+        if (buf.length < 5 + len) break;
+        const payload = buf.slice(5, 5 + len); buf = buf.slice(5 + len);
+        if (type === 0) play(new Int16Array(payload.buffer));
+        else if (type === 3) {
+          const ev = JSON.parse(new TextDecoder().decode(payload));
+          if (ev.event === "start") { rid = ev.id; nseg = ev.segments; setStat("s-seg", `0 / ${nseg}`); }
+          else if (ev.event === "segment") {
+            setStat("s-seg", `${ev.index + 1} / ${nseg}`);
+            if (ev.flag) { flagged = true; status(t("seg_flag")(ev.index + 1, ev.flag), "bad"); }
+          }
+        } else if (type === 1) {
+          const st = JSON.parse(new TextDecoder().decode(payload));
+          stopped = !!st.stopped;
+          if (st.total_s !== undefined) { setStat("s-total", fmt(st.total_s)); setStat("s-rtf", st.rtf.toFixed(2)); }
+        } else if (type === 2) throw new Error(new TextDecoder().decode(payload));
+      }
+    }
+    if (!flagged)
+      status(stopped ? t("stopped") : (stalls ? t("done_stalls")(stalls) : t("done")), stalls ? "bad" : "ok");
+    $("dl").disabled = !rid;
+  } catch (e) {
+    if (e.name === "AbortError") status(t("stopped")); else status(t("error") + e.message, "bad");
+  } finally {
+    $("run").disabled = false; $("stop").disabled = true; ctrl = null;
+  }
+}
+
+// Visualization of the audio being played (not the audio being generated): mirrored bars from the analyser's
+// spectrum, low frequencies in the middle, symmetric around the horizontal centre line.
+const NBARS = 64, MAX_HZ = 5000;          // speech energy sits below ~5 kHz
+let vizFreq = null;
+function barLevels() {
+  const n = analyser ? analyser.frequencyBinCount : 0, top = Math.floor(n * MAX_HZ / (SR / 2));
+  const lv = new Array(NBARS).fill(0);
+  if (!n) return lv;
+  if (!vizFreq) vizFreq = new Uint8Array(n);
+  analyser.getByteFrequencyData(vizFreq);
+  for (let i = 0; i < NBARS; i++) {
+    const a = Math.floor(top * i / NBARS), b = Math.max(a + 1, Math.floor(top * (i + 1) / NBARS));
+    let s = 0; for (let k = a; k < b; k++) s += vizFreq[k];
+    lv[i] = s / (b - a) / 255;
+  }
+  return lv;
+}
+function drawViz() {
+  const cv = $("viz"), dpr = window.devicePixelRatio || 1, W = cv.clientWidth * dpr, H = cv.clientHeight * dpr;
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  const g = cv.getContext("2d"), css = getComputedStyle(document.documentElement);
+  const grad = g.createLinearGradient(0, 0, W, 0);
+  grad.addColorStop(0, css.getPropertyValue("--accent").trim());
+  grad.addColorStop(0.5, css.getPropertyValue("--accent-2").trim());
+  grad.addColorStop(1, css.getPropertyValue("--accent").trim());
+  g.clearRect(0, 0, W, H); g.fillStyle = grad;
+  const lv = barLevels(), pad = 8 * dpr, gap = 3 * dpr, bw = (W - 2 * pad - gap * (NBARS - 1)) / NBARS;
+  const r = Math.min(bw / 2, 3 * dpr);
+  for (let i = 0; i < NBARS; i++) {
+    const v = lv[Math.abs(i - (NBARS - 1) / 2) * 2 | 0];
+    const h = Math.max(3 * dpr, v * (H - 2 * pad)), x = pad + i * (bw + gap), y = (H - h) / 2;
+    g.beginPath();
+    if (g.roundRect) g.roundRect(x, y, bw, h, r); else g.rect(x, y, bw, h);
+    g.fill();
+  }
+  requestAnimationFrame(drawViz);
+}
+requestAnimationFrame(drawViz);
+
+$("run").onclick = () => run();
+$("nav").onclick = e => { const a = e.target.closest("[data-tab]"); if (a) setTab(+a.dataset.tab); };
+$("lang").onclick = () => {
+  const from = LANG;
+  LANG = LANG === "zh" ? "en" : "zh";
+  localizeTexts(from);
+  applyLang();
+};
+$("langs").onclick = e => {
+  const c = e.target.closest("[data-i]"); if (!c) return;
+  $("text").value = LANG_SAMPLES[+c.dataset.i][1]; updateCount();
+};
+$("gear").onclick = () => $("settings").classList.toggle("open");
+document.addEventListener("click", e => {
+  if (!e.target.closest("#settings, #gear")) $("settings").classList.remove("open");
+});
+$("perf-more").onclick = () => {
+  $("perf-more").textContent = $("perf").classList.toggle("open") ? t("less") : t("more");
+};
+$("stop").onclick = () => { if (ctrl) ctrl.abort(); stopPlayback(); };
+$("dl").onclick = () => { if (rid) { const a = document.createElement("a"); a.href = "/wav/" + rid; a.click(); } };
+$("voices").onclick = e => {
+  const p = e.target.closest("[data-play]");
+  if (p) { togglePreview(p.dataset.play); return; }
+  const d = e.target.closest("[data-del]");
+  if (d) { deleteVoice(d.dataset.del); return; }
+  const c = e.target.closest(".vr");
+  if (c) { selectVoice(c.dataset.id); }
+};
+$("add").onclick = () => openClone(true);
+$("clone").onclick = e => { if (e.target === $("clone")) openClone(false); };
+$("styles").onclick = e => {
+  const c = e.target.closest("[data-ins]");
+  if (!c) return;
+  const ins = c.dataset.ins;
+  tabIns[tab] = tabIns[tab] === ins ? "" : ins;                  // clicked again: none
+  if (tabIns[tab] && sample(ins)) { $("text").value = sample(ins); updateCount(); }
+  renderPresets();
+};
+$("instruct").addEventListener("input", renderPresets);
+$("text").value = sample("default");
+tabText[1] = sample("default");
+setTab(1);
+localizeTexts("zh");
+applyLang();
+$("preroll").oninput = () => { $("preroll-v").textContent = (+$("preroll").value).toFixed(1) + " s"; };
+$("text").addEventListener("input", updateCount); updateCount();
+// vocal tags: a single tag goes in at the cursor, a paired tag wraps the selection (or goes in empty, cursor inside)
+$("tagbar").onclick = e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const ta = $("text"), a = ta.selectionStart, z = ta.selectionEnd;
+  ta.focus();
+  if (b.dataset.tag) ta.setRangeText(b.dataset.tag, a, z, "end");
+  else {
+    const open = `<${b.dataset.wrap}>`, close = `</${b.dataset.wrap}>`;
+    ta.setRangeText(open + ta.value.slice(a, z) + close, a, z, "end");
+    if (a === z) ta.selectionStart = ta.selectionEnd = a + open.length;
+  }
+  updateCount();
+};
+["text", "instruct"].forEach(id => $(id).addEventListener("keydown", e => {
+  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) run();
+}));
+loadVoices();
+</script>
+</body>
+</html>

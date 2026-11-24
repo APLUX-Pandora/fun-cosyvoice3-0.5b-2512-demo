@@ -1,0 +1,73 @@
+Fun-CosyVoice3-0.5B-2512
+========================
+
+This repository contains an on-device text-to-speech package for Qualcomm NPUs: a prebuilt inference library
+(sdk/lib/libcosyvoice3.so) with its C header and Python binding, a Python business layer, Python examples and a web
+demo. Application/business code and SDK binaries are separately licensed; see LICENSING.md.
+
+Model files
+-----------
+The model files (quantized QNN context binaries, host-side tensors and the two voice cloning models) are not
+distributed in this repository; they are downloaded separately (see docs/VOICE_CLONING.md#1-prepare-the-environment-and-model-resources) and come with their own license
+terms.
+
+Third-party components
+----------------------
+sdk/lib/libcosyvoice3.so includes
+  nlohmann/json 3.12.0, Copyright (c) 2013-2025 Niels Lohmann, License: MIT
+  pocketfft as shipped in NumPy 1.26.4, Copyright (C) 2004-2018 Max-Planck-Society, Martin Reinecke;
+    Copyright (c) 2005-2023, NumPy Developers, License: BSD-3-Clause
+  the Hugging Face tokenizers crate 0.20.4 (Apache License 2.0) and its dependencies (MIT / Apache License 2.0), with
+    the Oniguruma regex library (Copyright (c) 2002-2021 K.Kosako, BSD-2-Clause)
+  The license texts of all of them: sdk/lib/THIRD_PARTY_LICENSES.txt
+  OpenSSL 3.0.2 (libcrypto), statically linked. Copyright The OpenSSL Project Authors.
+    Apache License 2.0; see sdk/lib/LICENSES/OpenSSL.txt.
+
+demo/assets/clone_assets.npz
+  Constant tables of the voice cloning feature extractors (mel filterbanks and windows), computed with openai-whisper
+  (MIT), torchaudio (BSD-2-Clause) and librosa (ISC)
+
+Python packages used by the SDK frontend/cloning and Demo (installed by the user; not bundled wheels)
+  wetext (Apache License 2.0), fugashi (MIT) and unidic-lite (BSD-3-Clause; UniDic), tokenizers (Apache License 2.0),
+  regex (Apache License 2.0), flask (BSD-3-Clause), onnxruntime (MIT), numpy (BSD-3-Clause), soundfile (BSD-3-Clause)
+
+Inference runtime
+-------------------------
+The SDK bundles Qualcomm QNN under the terms in sdk/lib/qnn248/. Aidlux LMS and the device drivers are system dependencies.
+They are not part of this repository and are covered by their own licenses.
+
+Voices
+------
+The built-in voices (sdk/assets/voices/{female-zh,female-en,male-en}/) are cloned from one recording each:
+  female-zh  AISHELL-1 (https://www.openslr.org/33/), utterance BAC009S0736W0134, Apache License 2.0
+  female-en  LibriSpeech test-clean (https://www.openslr.org/12/), utterance 121-121726-0003 (2.48-6.58 s), CC BY 4.0
+             (V. Panayotov, G. Chen, D. Povey, S. Khudanpur, "LibriSpeech: an ASR corpus based on public domain audio
+             books", ICASSP 2015)
+  male-en    LibriSpeech test-clean, utterance 2300-131720-0036 (0.40-4.40 s), CC BY 4.0
+CC BY 4.0: https://creativecommons.org/licenses/by/4.0/ .
+Only the three reference voices listed above are included in this delivery.
+Other voices from older model packages are excluded from the Demo and example catalogue.
+
+
+Upstream model terms / 上游模型条款
+---------------------------------------
+Fun-CosyVoice3
+  https://huggingface.co/FunAudioLLM/Fun-CosyVoice3-0.5B-2512
+  Upstream model card: Apache License 2.0.
+  The upstream portions retain Apache-2.0 rights; the Pandora agreement covers
+  only APLUX proprietary additions/adaptations to the extent APLUX owns them.
+  上游部分保留 Apache-2.0 权利，Pandora 协议仅在阿加犀拥有权利的范围内适用于其专有新增/适配部分。
+  Full license: LICENSES/Apache-2.0.txt
+
+Verified unchanged upstream model files / 已核对与上游相同的模型文件
+-----------------------------------------------------------------
+clone/speaker_encoder.onnx = upstream campplus.onnx
+  SHA-256: a6ac6a63997761ae2997373e2ee1c47040854b4b759ea41ec48e4e42df0f4d73
+clone/speech_encoder.onnx = upstream speech_tokenizer_v3.onnx
+  SHA-256: 23236a74175dbdda47afc66dbadd5bcb41303c467a57c261cb8539ad9db9208d
+Source: https://huggingface.co/FunAudioLLM/Fun-CosyVoice3-0.5B-2512
+These files retain their upstream Apache-2.0 license.
+这些文件保留上游 Apache-2.0 许可，不将其改为阿加犀专有材料。
+
+
+Native text dependencies: statically linked OpenFST1.8.5, MeCab0.996 (BSD option), ICU70/Unicode14; adaptations from kaldifst1.8.3 and WeText0.0.4 (Apache-2.0). Full licenses/notices: sdk/lib/LICENSES/native-text/ and SDK third_party/wetext/.

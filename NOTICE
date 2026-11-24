@@ -1,0 +1,64 @@
+fun-cosyvoice3-0.5b-2512-demo
+=============================
+
+This repository contains an on-device port (C++ inference library, Python business layer, web UI) of
+Fun-CosyVoice3-0.5B-2512 for Qualcomm NPUs.
+
+Upstream model and code
+-----------------------
+Fun-CosyVoice3-0.5B-2512 (FunAudioLLM)
+  model: https://huggingface.co/FunAudioLLM/Fun-CosyVoice3-0.5B-2512 (rev 29e01c4)
+         https://www.modelscope.cn/models/FunAudioLLM/Fun-CosyVoice3-0.5B-2512
+  code:  https://github.com/FunAudioLLM/CosyVoice (rev 074ca6d)
+  License: Apache License 2.0 (see LICENSE)
+The model files themselves (quantized QNN context binaries and host-side tensors derived from the upstream weights) are
+not distributed in this repository. The voice cloning models (speech_tokenizer_v3.onnx, campplus.onnx) are downloaded
+from the official release by the user (docs/VOICE_CLONING.md#1-prepare-the-environment-and-model-resources).
+
+Third-party components
+----------------------
+demo/assets/clone_assets.npz
+  Constant tables of the upstream frontend's feature extractors (mel filterbanks and windows), computed with
+  openai-whisper (MIT), torchaudio (BSD-2-Clause) and librosa (ISC) by the voice preparation process.
+
+nlohmann/json (compiled into libcosyvoice3.so)
+  Copyright (c) 2013-2025 Niels Lohmann <https://nlohmann.me>
+  License: MIT (see sdk/lib/THIRD_PARTY_LICENSES.txt)
+
+pocketfft from NumPy (compiled into libcosyvoice3.so)
+  Copyright (C) 2004-2018 Max-Planck-Society, Martin Reinecke; Copyright (c) 2005-2023, NumPy Developers
+  License: BSD-3-Clause (see sdk/lib/THIRD_PARTY_LICENSES.txt)
+
+text_tokenizer (compiled into libcosyvoice3.so)
+  Our C API (Apache License 2.0) over the Hugging Face tokenizers crate 0.20.4 (Apache License 2.0) and its
+  dependencies (MIT / Apache License 2.0), with the Oniguruma regex library (Copyright (c) 2002-2021 K.Kosako,
+  BSD-2-Clause). Every crate and its license text: sdk/lib/THIRD_PARTY_LICENSES.txt
+
+OpenSSL 3.0.2 (libcrypto, statically linked into libcosyvoice3.so)
+  Copyright The OpenSSL Project Authors
+  License: Apache-2.0 (see LICENSES/OpenSSL.txt)
+
+ICU, OpenFST and MeCab are compiled into the native library. See sdk/lib/LICENSES/native-text/.
+WeText-derived frontend code retains Apache 2.0 terms (see sdk/third_party/wetext/).
+
+SDK Python dependencies include NumPy and UniDic. The Demo also uses Flask, Werkzeug,
+  SoundFile and huggingface_hub. See sdk/lib/THIRD_PARTY_NOTICES.txt.
+
+Inference runtime
+-------------------------
+The bundled Pandora Runtime wheel and its SDK integration use Apache License 2.0.
+See the wheel's LICENSE and NOTICE.
+The SDK bundles Qualcomm QNN under the terms in sdk/lib/qnn248/. Aidlux LMS and the device drivers are system dependencies.
+They are not part of this repository and are covered by their own licenses.
+
+Voices
+------
+The three prepared built-in voices under sdk/assets/voices/ derive from these recordings:
+  female-zh  AISHELL-1 (https://www.openslr.org/33/), BAC009S0736W0134, Apache License 2.0
+  female-en  LibriSpeech test-clean (https://www.openslr.org/12/), 121-121726-0003 (2.48-6.58 s), CC BY 4.0
+  male-en    LibriSpeech test-clean, 2300-131720-0036 (0.40-4.40 s), CC BY 4.0
+LibriSpeech attribution: V. Panayotov, G. Chen, D. Povey, S. Khudanpur,
+"LibriSpeech: an ASR corpus based on public domain audio books", ICASSP 2015.
+The conditioning values are preserved by the flat-package migration. Recordings,
+optional previews and derived voice conditions retain their source permissions.
+Personal user voices are not included or automatically published.

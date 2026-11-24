@@ -1,0 +1,5 @@
+{
+  "model_id": "FunAudioLLM/Fun-CosyVoice3-0.5B-2512",
+  "builtin_voices": "voices",
+  "conditioning_version": "cosyvoice3-reference-v1"
+}

@@ -1,0 +1,74 @@
+Standalone SDK library notices
+==============================
+
+Applies to libcosyvoice3.so.
+APLUX proprietary additions are subject to LICENSE and LICENSE.zh-CN.txt.
+Third-party portions retain their own licenses; full texts accompany this library
+in THIRD_PARTY_LICENSES.txt and LICENSES/Apache-2.0.txt.
+
+Third-party components
+----------------------
+sdk/lib/libcosyvoice3.so includes
+  nlohmann/json 3.12.0, Copyright (c) 2013-2025 Niels Lohmann, License: MIT
+  pocketfft as shipped in NumPy 1.26.4, Copyright (C) 2004-2018 Max-Planck-Society, Martin Reinecke;
+    Copyright (c) 2005-2023, NumPy Developers, License: BSD-3-Clause
+  the Hugging Face tokenizers crate 0.20.4 (Apache License 2.0) and its dependencies (MIT / Apache License 2.0), with
+    the Oniguruma regex library (Copyright (c) 2002-2021 K.Kosako, BSD-2-Clause)
+  The license texts accompany this SDK in THIRD_PARTY_LICENSES.txt.
+  The pocketfft license is also in LICENSES/pocketfft-BSD-3-Clause.txt.
+
+Inference runtime
+-------------------------
+Pandora QNN Runtime integration module, Copyright 2026 APLUX.
+The integration code and shared hardware-settings API are licensed under the
+Apache License 2.0. See LICENSES/Apache-2.0.txt.
+
+The SDK bundles Qualcomm QNN under the terms in qnn248/. Aidlux LMS and the device drivers are system dependencies.
+They are not part of this repository and are covered by their own licenses.
+
+Python API and reference-conditioning resources
+----------------------------------------------
+The public C header, Python API/helper modules and accompanying documentation
+remain Apache-2.0. Their inclusion with the native binary does not relicense
+them under the native library's proprietary terms. See LICENSES/Apache-2.0.txt.
+The model weights and ONNX reference encoders are separate downloads, not bundled.
+
+The optional Demo voice tool uses feature tables computed with openai-whisper,
+torchaudio and librosa. See the Demo NOTICE for the application asset and licenses.
+
+Python packages are installed separately using requirements.txt. NumPy, tokenizers,
+wetext, regex, fugashi, unidic-lite and soundfile retain their own
+licenses; these packages' wheels are not bundled in the SDK archive.
+
+Built-in reference voice conditioning packs in ../assets/voices/:
+  female-zh: AISHELL-1 BAC009S0736W0134, Apache-2.0, https://www.openslr.org/33/
+  female-en: LibriSpeech test-clean 121-121726-0003, 2.48-6.58 s, CC BY 4.0
+  male-en: LibriSpeech test-clean 2300-131720-0036, 0.40-4.40 s, CC BY 4.0
+LibriSpeech attribution: V. Panayotov, G. Chen, D. Povey, S. Khudanpur,
+"LibriSpeech: an ASR corpus based on public domain audio books", ICASSP 2015.
+Dataset: https://www.openslr.org/12/ . License: https://creativecommons.org/licenses/by/4.0/
+The SDK includes derived conditioning data and a reference recording (preview.wav) for each of these voices.
+User-created reference packs remain the user's responsibility and are not bundled.
+
+Native reference feature arithmetic
+-----------------------------------
+The contiguous float32 pairwise reduction and scaled complex magnitude follow
+NumPy2.2.6, numpy/_core/src/umath/loops_utils.h.src and
+loops_unary_complex.dispatch.c.src. Copyright (c) NumPy Developers.
+BSD-3-Clause; the full NumPy license accompanies this SDK as
+LICENSES/NumPy-2.2.6-BSD-3-Clause.txt. These routines do not embed a Python or
+NumPy runtime in the native library.
+
+
+Native text dependencies: statically linked OpenFST1.8.5, MeCab0.996 (BSD
+option), ICU70/Unicode14; adaptations from kaldifst1.8.3 and WeText0.0.4
+(Apache-2.0). See LICENSES/native-text/ for the native dependency licenses.
+The WeText NOTICE and LICENSE are in ../third_party/wetext/ in the standalone
+SDK and ../licenses/wetext/ in the Python wheel.
+
+The full ICU 70.1 upstream license, including data and dictionary notices,
+accompanies this SDK in LICENSES/native-text/ICU-LICENSE. The distribution
+copyright notice is in LICENSES/native-text/ICU-copyright.
+
+OpenSSL 3.0.2 (libcrypto) is statically linked into libcosyvoice3.so.
+Copyright The OpenSSL Project Authors. License: Apache-2.0. See LICENSES/OpenSSL.txt.

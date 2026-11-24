@@ -1,0 +1,9 @@
+include pyproject.toml setup.py
+include wheels/pandora_runtime-*.whl
+recursive-include python *.py
+recursive-include lib *
+recursive-include assets *
+recursive-include third_party/wetext *
+
+recursive-include include *.h
+include README.md PYTHON_API.md RUNTIME_API.md

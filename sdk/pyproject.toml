@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68", "wheel>=0.41"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pandora-fun-cosyvoice3-0-5b-2512"
+version = "1.0.0"
+description = "Fun-CosyVoice3 inference SDK for Linux AArch64"
+license = {text = "Apache-2.0 Python bindings; native components retain the bundled component-specific terms."}
+requires-python = ">=3.10,<3.13"
+dependencies = [
+  "numpy>=1.26.4,<3",
+  "unidic-lite>=1.0.8,<2",
+  "pandora-runtime>=1.0.2,<2"
+]
+
+[project.optional-dependencies]
+ja = []
+segment = []

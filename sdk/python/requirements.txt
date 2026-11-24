@@ -1,0 +1,2 @@
+# Legacy checkout-root entry point; SDK dependencies are declared only in pyproject.toml.
+./sdk

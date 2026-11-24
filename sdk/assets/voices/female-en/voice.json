@@ -1,0 +1,68 @@
+{
+  "id": "female-en",
+  "name": "英文女声",
+  "gender": "female",
+  "prompt_text": "A heart trouble caused by falling in love with a grass widow.",
+  "prompt_text_norm": "You are a helpful assistant.<|endofprompt|>A heart trouble caused by falling in love with a grass widow.",
+  "prompt_tokens": 102,
+  "prompt_text_tokens": 20,
+  "prompt_s": 4.1,
+  "source": "LibriSpeech test-clean 121-121726-0003, 2.48-6.58 s (CC BY 4.0)",
+  "reference_language": "en",
+  "format_version": 1,
+  "model_id": "FunAudioLLM/Fun-CosyVoice3-0.5B-2512",
+  "conditioning_version": "cosyvoice3-reference-v1",
+  "files": {
+    "prompt_text_ids": {
+      "path": "prompt_text_ids.npy",
+      "sha256": "4bda99ce85e64b55e4e2350046c7bc4a6b8594cb00dd14bce785ed40dfd8129f",
+      "dtype": "<i4",
+      "shape": [
+        20
+      ]
+    },
+    "prompt_text_rows": {
+      "path": "prompt_text_rows.npy",
+      "sha256": "7775a111e606da536a5c93d043e8b88fa280ba9426ed0c5e1074b33781848af2",
+      "dtype": "<f4",
+      "shape": [
+        20,
+        896
+      ]
+    },
+    "llm_prompt_token": {
+      "path": "llm_prompt_token.npy",
+      "sha256": "7f6d6f136a5c17be8d624f9bbffa74e4eb7bc73ea95691e5c4c027d69759b193",
+      "dtype": "<i4",
+      "shape": [
+        102
+      ]
+    },
+    "flow_prompt_token": {
+      "path": "flow_prompt_token.npy",
+      "sha256": "7f6d6f136a5c17be8d624f9bbffa74e4eb7bc73ea95691e5c4c027d69759b193",
+      "dtype": "<i4",
+      "shape": [
+        102
+      ]
+    },
+    "prompt_feat": {
+      "path": "prompt_feat.npy",
+      "sha256": "07a76c026c77197d9c9ddcf88e545fe765204ca6b8143b3e33e0435221f31eea",
+      "dtype": "<f4",
+      "shape": [
+        204,
+        80
+      ]
+    },
+    "embedding": {
+      "path": "embedding.npy",
+      "sha256": "f3a31fecefe487658abc4b10fca3d21deecfe84ad4a94ec27555748b7b40136c",
+      "dtype": "<f4",
+      "shape": [
+        192
+      ]
+    }
+  },
+  "preview": "preview.wav"
+}

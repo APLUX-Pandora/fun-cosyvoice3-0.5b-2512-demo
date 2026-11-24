@@ -1,0 +1,12 @@
+WeText 0.0.4
+Upstream: https://github.com/pengzhendong/wetext
+Copyright (c) 2022, 2024 Zhendong Peng
+Apache License 2.0; see LICENSE.
+
+The SDK's native Chinese text normalization adapts the WeText token parser
+and local-file normalization logic. The model package supplies the FST
+graphs separately.
+
+Native composition also adapts the kaldifst 1.8.3 TextNormalizer,
+Copyright (c) 2023 Xiaomi, Apache License 2.0. See
+../../lib/LICENSES/native-text/kaldifst-LICENSE.

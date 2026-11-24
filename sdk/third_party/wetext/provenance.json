@@ -1,0 +1,8 @@
+{
+  "upstream": "wetext 0.0.4",
+  "files": {
+    "wetext-004-token-parser.py": "172b4c1448d6c467cc34c7ad6de093f332b72578241bcabfa031ec5a8dfe8e60",
+    "wetext-004-normalizer.py": "aad8edaddeaa15d51dd3cf98b25f6f85faaf9282832770f781681038f9521130"
+  },
+  "adaptation": "local-file Chinese TN only; original accepted model-package graphs"
+}

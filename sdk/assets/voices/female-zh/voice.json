@@ -1,0 +1,68 @@
+{
+  "id": "female-zh",
+  "name": "中文女声",
+  "gender": "female",
+  "prompt_text": "北京房地产市场进入相对平稳的水平。",
+  "prompt_text_norm": "You are a helpful assistant.<|endofprompt|>北京房地产市场进入相对平稳的水平。",
+  "prompt_tokens": 112,
+  "prompt_text_tokens": 24,
+  "prompt_s": 4.5,
+  "source": "AISHELL-1 BAC009S0736W0134 (Apache License 2.0)",
+  "reference_language": "zh",
+  "format_version": 1,
+  "model_id": "FunAudioLLM/Fun-CosyVoice3-0.5B-2512",
+  "conditioning_version": "cosyvoice3-reference-v1",
+  "files": {
+    "prompt_text_ids": {
+      "path": "prompt_text_ids.npy",
+      "sha256": "721ff373b251501ae8d5342920757ab11c9463db48d0631657e6bbd6da77c4ba",
+      "dtype": "<i4",
+      "shape": [
+        24
+      ]
+    },
+    "prompt_text_rows": {
+      "path": "prompt_text_rows.npy",
+      "sha256": "e31b0c02c6003d20aa459a5d308fce24bcee8f63c2a122074da93be7c8d9c24b",
+      "dtype": "<f4",
+      "shape": [
+        24,
+        896
+      ]
+    },
+    "llm_prompt_token": {
+      "path": "llm_prompt_token.npy",
+      "sha256": "964ea0ba579b70bc3a9a73371c48df5e0e1bc39c6176cd42d0ef8e7f69867557",
+      "dtype": "<i4",
+      "shape": [
+        112
+      ]
+    },
+    "flow_prompt_token": {
+      "path": "flow_prompt_token.npy",
+      "sha256": "964ea0ba579b70bc3a9a73371c48df5e0e1bc39c6176cd42d0ef8e7f69867557",
+      "dtype": "<i4",
+      "shape": [
+        112
+      ]
+    },
+    "prompt_feat": {
+      "path": "prompt_feat.npy",
+      "sha256": "b5a859301e81276f3bb14aa4a6fc1cb2462a5acbe8e90138aa9cc1a76b1555f3",
+      "dtype": "<f4",
+      "shape": [
+        224,
+        80
+      ]
+    },
+    "embedding": {
+      "path": "embedding.npy",
+      "sha256": "a7e2207467c1289912bc98f73cc1fc1a209472cd83eac5ef2d58981a5da339e3",
+      "dtype": "<f4",
+      "shape": [
+        192
+      ]
+    }
+  },
+  "preview": "preview.wav"
+}

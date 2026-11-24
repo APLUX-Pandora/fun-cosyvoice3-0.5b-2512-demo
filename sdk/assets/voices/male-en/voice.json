@@ -1,0 +1,68 @@
+{
+  "id": "male-en",
+  "name": "英文男声",
+  "gender": "male",
+  "prompt_text": "The meter continued in general service during eighteen ninety-nine.",
+  "prompt_text_norm": "You are a helpful assistant.<|endofprompt|>The meter continued in general service during eighteen ninety-nine.",
+  "prompt_tokens": 100,
+  "prompt_text_tokens": 18,
+  "prompt_s": 4.0,
+  "source": "LibriSpeech test-clean 2300-131720-0036, 0.40-4.40 s (CC BY 4.0)",
+  "reference_language": "en",
+  "format_version": 1,
+  "model_id": "FunAudioLLM/Fun-CosyVoice3-0.5B-2512",
+  "conditioning_version": "cosyvoice3-reference-v1",
+  "files": {
+    "prompt_text_ids": {
+      "path": "prompt_text_ids.npy",
+      "sha256": "e0e8eb06e1d0e5465c15ca50c9766a588201ee24a2c656b2cca911bd160a1e8e",
+      "dtype": "<i4",
+      "shape": [
+        18
+      ]
+    },
+    "prompt_text_rows": {
+      "path": "prompt_text_rows.npy",
+      "sha256": "d2ec6823b5706e24e2b1e6672c261d317f5673ea6ab62b327b68e353be5bf869",
+      "dtype": "<f4",
+      "shape": [
+        18,
+        896
+      ]
+    },
+    "llm_prompt_token": {
+      "path": "llm_prompt_token.npy",
+      "sha256": "246ba4978139646a0ee345b2cb0daf896e704a088f2f3d5f5e0072bda6c459d5",
+      "dtype": "<i4",
+      "shape": [
+        100
+      ]
+    },
+    "flow_prompt_token": {
+      "path": "flow_prompt_token.npy",
+      "sha256": "246ba4978139646a0ee345b2cb0daf896e704a088f2f3d5f5e0072bda6c459d5",
+      "dtype": "<i4",
+      "shape": [
+        100
+      ]
+    },
+    "prompt_feat": {
+      "path": "prompt_feat.npy",
+      "sha256": "f419020fb4466ebcec2ea728438b956677454f81f40b4c1d41970b0273d0fad7",
+      "dtype": "<f4",
+      "shape": [
+        200,
+        80
+      ]
+    },
+    "embedding": {
+      "path": "embedding.npy",
+      "sha256": "9aa02d274b2f4c4376a95e7430c36b166fdcef1c10ac7fd0c32e03b2a383e662",
+      "dtype": "<f4",
+      "shape": [
+        192
+      ]
+    }
+  },
+  "preview": "preview.wav"
+}

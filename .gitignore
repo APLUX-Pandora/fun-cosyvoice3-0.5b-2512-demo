@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+*.log
+*.egg-info/
+sdk/build/
+models/*
+!models/CLONE_SHA256SUMS
+!models/verify_model_package.py
+clone_models/
+demo/out/
+demo/certs/
+demo/web.pid
+voices_user/

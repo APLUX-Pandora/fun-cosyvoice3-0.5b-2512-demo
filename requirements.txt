@@ -1,0 +1,7 @@
+./sdk/wheels/pandora_runtime-1.0.2-py3-none-linux_aarch64.whl
+./sdk
+# SDK, Web Demo, audio-file I/O for examples and voice creation, and model downloads.
+flask>=2.0
+soundfile>=0.12,<0.15
+werkzeug>=2.0
+huggingface_hub>=1.0,<2

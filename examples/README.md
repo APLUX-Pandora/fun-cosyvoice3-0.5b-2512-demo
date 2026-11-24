@@ -21,42 +21,30 @@ Complete [Install](../README.md#1-install) and [Get the model](../README.md#2-ge
 Synthesize a built-in Chinese sample and save `speech.wav`.
 
 ```bash
-python examples/python/synthesize.py
+python examples/python/synthesize.py --out speech.wav
 ```
 
-Output excerpt:
-
-```text
-finish_reason=stop
-```
+Open `speech.wav` in an audio player.
 
 ### stream.py
 
 Write an audio chunk and cancel the rest of the request. Omit `--stop-after-chunks` to stream to completion.
 
 ```bash
-python examples/python/stream.py --stop-after-chunks 1
+python examples/python/stream.py --stop-after-chunks 1 --out stream.wav
 ```
 
-Output excerpt:
-
-```text
-finish_reason=cancelled
-```
+Open `stream.wav` in an audio player. This example stops after the first chunk; omit `--stop-after-chunks 1` to hear the full utterance.
 
 ### synthesize_cloned_voice.py
 
 Load the bundled English voice package and synthesize a sample. To use another prepared voice, pass its package directory with `--voice-package` and the text language with `--language`. The [voice cloning guide](../docs/VOICE_CLONING.md) covers creating packages in the application.
 
 ```bash
-python examples/python/synthesize_cloned_voice.py
+python examples/python/synthesize_cloned_voice.py --out cloned-voice.wav
 ```
 
-Output excerpt:
-
-```text
-finish_reason=stop
-```
+Open `cloned-voice.wav` in an audio player.
 
 ## C example
 

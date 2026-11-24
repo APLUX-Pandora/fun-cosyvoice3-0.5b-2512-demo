@@ -29,12 +29,15 @@ Check the [device requirements](../docs/SDK_ENVIRONMENT.md) before loading a mod
 ## Usage
 
 ```python
+import soundfile as sf
 from pandora_fun_cosyvoice3_0_5b_2512 import TTSModel
 
 with TTSModel.from_pretrained("models") as model:
     result = model.synthesize("Hello, welcome to text-to-speech.", speaker="female-en", language="en")
-    print(result.sample_rate, result.duration_s, result.finish_reason)
+    sf.write("speech.wav", result.audio, result.sample_rate)
 ```
+
+Open `speech.wav` in an audio player to hear the result.
 
 ## Documentation
 

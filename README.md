@@ -52,16 +52,14 @@ This installs the SDK, the Web Demo and the Hugging Face CLI. To use only the SD
 
 ## 2. Get the model
 
-Download the shared resources and the target for your device. This example uses QCS8550:
+Download the shared files and one device target. The commands below use QCS8550; for another device, use the folder in the [targets table](docs/MODEL_SETUP.md#targets).
+
+For a private model, run `hf auth login` first.
 
 ```bash
 hf download APLUX-Pandora/Fun-CosyVoice3-0.5B-2512 --local-dir models --exclude "targets/*" --exclude "media/*" --exclude README.md --exclude .gitattributes
 hf download APLUX-Pandora/Fun-CosyVoice3-0.5B-2512 --local-dir models --include "targets/qcs8550_qnn248/*"
 ```
-
-For a private repository, run `hf auth login` first. Available targets and the folder layout are in [Model setup](docs/MODEL_SETUP.md).
-
-Run `cat /sys/devices/soc0/soc_id` on your device and use the [Targets table](docs/MODEL_SETUP.md#targets) to pick the target folder in the second command. The SDK selects the compatible target automatically.
 
 ## 3. Run the Web Demo
 
@@ -76,12 +74,15 @@ Open `https://<device-ip>:8766/` and select a voice, enter text and start synthe
 In the same environment, from the Demo root:
 
 ```python
+import soundfile as sf
 from pandora_fun_cosyvoice3_0_5b_2512 import TTSModel
 
 with TTSModel.from_pretrained("models") as model:
     result = model.synthesize("Hello, welcome to text-to-speech.", speaker="female-en", language="en")
-    print(result.sample_rate, result.duration_s, result.finish_reason)
+    sf.write("speech.wav", result.audio, result.sample_rate)
 ```
+
+Open `speech.wav` in an audio player to hear the result.
 
 More in the [Python API](sdk/PYTHON_API.md) and [examples](examples/README.md).
 
